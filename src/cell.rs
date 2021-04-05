@@ -268,7 +268,7 @@ impl Cell {
                 // Unknown colors, fallback to blakc
                 _ => "#000000",
             }
-        };
+        }
 
         let colspan = if self.hspan > 1 {
             format!(" colspan=\"{}\"", self.hspan)
