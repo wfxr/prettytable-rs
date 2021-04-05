@@ -140,26 +140,29 @@ impl<'a> TableSlice<'a> {
         let mut height = 0;
         // Compute columns width
         let col_width = self.get_all_column_width();
-        height += self.format
-            .print_line_separator(out, &col_width, LinePosition::Top)?;
+        height += self.print_separator(out, &col_width, LinePosition::Top)?;
         if let Some(ref t) = *self.titles {
             height += f(t, out, self.format, &col_width)?;
-            height += self.format
-                .print_line_separator(out, &col_width, LinePosition::Title)?;
+            height += self.print_separator(out, &col_width, LinePosition::Title)?;
         }
         // Print rows
         let mut iter = self.rows.iter().peekable();
         while let Some(r) = iter.next() {
             height += f(r, out, self.format, &col_width)?;
             if iter.peek().is_some() {
-                height += self.format
-                    .print_line_separator(out, &col_width, LinePosition::Intern)?;
+                height += self.print_separator(out, &col_width, LinePosition::Intern)?;
             }
         }
-        height += self.format
-            .print_line_separator(out, &col_width, LinePosition::Bottom)?;
+        height += self.print_separator(out, &col_width, LinePosition::Bottom)?;
         out.flush()?;
         Ok(height)
+    }
+
+    fn print_separator<T: Write + ?Sized>(&self, out: &mut T, col_width: &[usize], position: LinePosition) -> Result<usize, Error> {
+        match position {
+            LinePosition::Bottom if self.format.hide_bottom_sep_when_empty && self.rows.is_empty() => Ok(0),
+            _ => self.format.print_line_separator(out, &col_width, position)
+        }
     }
 
     /// Print the table to `out` and returns the number of

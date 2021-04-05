@@ -107,25 +107,27 @@ impl Default for LineSeparator {
 #[derive(Clone, Debug, Copy, Hash, PartialEq, Eq)]
 pub struct TableFormat {
     /// Optional column separator character
-    csep: Option<char>,
+    pub (crate) csep: Option<char>,
     /// Optional left border character
-    lborder: Option<char>,
+    pub (crate) lborder: Option<char>,
     /// Optional right border character
-    rborder: Option<char>,
+    pub (crate) rborder: Option<char>,
     /// Optional internal line separator
-    lsep: Option<LineSeparator>,
+    pub (crate) lsep: Option<LineSeparator>,
     /// Optional title line separator
-    tsep: Option<LineSeparator>,
+    pub (crate) tsep: Option<LineSeparator>,
     /// Optional top line separator
-    top_sep: Option<LineSeparator>,
+    pub (crate) top_sep: Option<LineSeparator>,
     /// Optional bottom line separator
-    bottom_sep: Option<LineSeparator>,
+    pub (crate) bottom_sep: Option<LineSeparator>,
     /// Left padding
-    pad_left: usize,
+    pub (crate) pad_left: usize,
     /// Right padding
-    pad_right: usize,
+    pub (crate) pad_right: usize,
     /// Global indentation when rendering the table
-    indent: usize,
+    pub (crate) indent: usize,
+    /// Hide bottom separator when table is empty
+    pub (crate) hide_bottom_sep_when_empty: bool,
 }
 
 impl TableFormat {
@@ -142,6 +144,7 @@ impl TableFormat {
             pad_left: 0,
             pad_right: 0,
             indent: 0,
+            hide_bottom_sep_when_empty: false,
         }
     }
 
@@ -192,6 +195,11 @@ impl TableFormat {
         for pos in what {
             self.separator(*pos, separator);
         }
+    }
+
+    /// Hide bottom separator when the table is empty
+    pub fn hide_bottom_sep_when_empty(&mut self, enable: bool) {
+        self.hide_bottom_sep_when_empty = enable;
     }
 
     fn get_sep_for_line(&self, pos: LinePosition) -> &Option<LineSeparator> {
@@ -320,6 +328,12 @@ impl FormatBuilder {
     /// Set separator format for multiple kind of line separators
     pub fn separators(mut self, what: &[LinePosition], separator: LineSeparator) -> Self {
         self.format.separators(what, separator);
+        self
+    }
+
+    /// Hide bottom separator when the table is empty
+    pub fn hide_bottom_sep_when_empty(mut self, enable: bool) -> Self {
+        self.format.hide_bottom_sep_when_empty(enable);
         self
     }
 
